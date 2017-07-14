@@ -13,17 +13,29 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        KOSessionTask.accessTokenInfoTask(completionHandler: { (result, error) in
+            if error == nil {
+                print("logged in state")
+                print(result!.id)
+            } else {
+                print("not logged in state")
+            }
+        })
+        
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
 
     @IBAction func loginKakao(_ sender: UIButton) {
         let session = KOSession.shared()
         // 로그인 세션이 생성 되었으면
         if let s = session {
+            print(KOSessionState.open.rawValue)
             // 이전 열린 세션은 닫고
             if s.isOpen() {
                 s.close()

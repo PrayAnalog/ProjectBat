@@ -44,5 +44,66 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="XG8-Ww-5KX">
+            <objects>
+                <viewController storyboardIdentifier="loginSuccess" id="nqa-XO-tNz" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="9Qg-tc-zO8"/>
+                        <viewControllerLayoutGuide type="bottom" id="yQz-Zu-SHW"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="h2G-Qu-7mf">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login success" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Bg5-wI-ERs">
+                                <rect key="frame" x="102" y="317.5" width="171.5" height="32.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Bg5-wI-ERs" firstAttribute="centerX" secondItem="h2G-Qu-7mf" secondAttribute="centerX" id="A3k-ZN-j62"/>
+                            <constraint firstItem="Bg5-wI-ERs" firstAttribute="centerY" secondItem="h2G-Qu-7mf" secondAttribute="centerY" id="FM6-m8-rvJ"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="RBK-01-kj4"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NsU-x3-v3y" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="910" y="-172"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="1B1-eV-I2W">
+            <objects>
+                <viewController storyboardIdentifier="loginFail" id="P3X-yi-VDY" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="2Ub-NZ-zBd"/>
+                        <viewControllerLayoutGuide type="bottom" id="Bn1-E1-oO2"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="ZBf-zl-T1F">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Login Fail" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5eM-qX-ffn">
+                                <rect key="frame" x="130.5" y="317" width="114" height="33"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="5eM-qX-ffn" firstAttribute="centerY" secondItem="ZBf-zl-T1F" secondAttribute="centerY" id="0JJ-W1-VOy"/>
+                            <constraint firstItem="5eM-qX-ffn" firstAttribute="centerX" secondItem="ZBf-zl-T1F" secondAttribute="centerX" id="1Px-yA-5XT"/>
+                        </constraints>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="EtK-o4-ucZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="911" y="501"/>
+        </scene>
     </scenes>
 </document>
