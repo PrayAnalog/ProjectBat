@@ -10,14 +10,58 @@ import UIKit
 
 class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     
+    @IBOutlet weak var gameEndView: UIView!
+    @IBOutlet weak var gameResultLabel: UILabel!
+    
+    @IBOutlet weak var rock0ImageView: UIImageView!
+    @IBOutlet weak var rock1ImageView: UIImageView!
+    @IBOutlet weak var rock2ImageView: UIImageView!
+    @IBOutlet weak var rock3ImageView: UIImageView!
+    @IBOutlet weak var rock4ImageView: UIImageView!
+    public var rock5Image: UIImage!
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.initRockImageView()
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.showMoreActions(_:)))
         tap.numberOfTapsRequired = 1
         view.addGestureRecognizer(tap)
         
+        
         // Do any additional setup after loading the view.
+    }
+    
+    func initRockImageView() {
+        if (userColor == UIColor.black) {
+            rock0ImageView.image = UIImage(named: "go_black")
+            rock1ImageView.image = UIImage(named: "go_black")
+            rock2ImageView.image = UIImage(named: "go_black")
+            rock3ImageView.image = UIImage(named: "go_white")
+            rock4ImageView.image = UIImage(named: "go_white")
+            rock5Image = UIImage(named: "go_white")!
+        }
+        else {
+            rock0ImageView.image = UIImage(named: "go_white")
+            rock1ImageView.image = UIImage(named: "go_white")
+            rock2ImageView.image = UIImage(named: "go_white")
+            rock3ImageView.image = UIImage(named: "go_black")
+            rock4ImageView.image = UIImage(named: "go_black")
+            rock5Image = UIImage(named: "go_black")!
+        }
+    }
+    
+    func RockImageViewMove() {
+        var tempImage: UIImage!
+        tempImage = rock0ImageView.image
+        rock0ImageView.image = rock1ImageView.image
+        rock1ImageView.image = rock2ImageView.image
+        rock2ImageView.image = rock3ImageView.image
+        rock3ImageView.image = rock4ImageView.image
+        rock4ImageView.image = rock5Image
+        rock5Image = tempImage
+        
     }
     
     // width = 30, 346, 18 columns
@@ -28,12 +72,12 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     let y18 : Float = 525
     let length : Float = 17.55
     
-    var userColor : UIColor = UIColor.white
-    var enemyColor : UIColor = UIColor.black
+    var userColor : UIColor = UIColor.black
+    var enemyColor : UIColor = UIColor.white
     var tempPositionX : Int = -1
     var tempPositionY : Int = -1
     var myOrder : Bool = true
-    
+    var rockExist : [(Int, Int)] = []
     var DynamicTempView = UIView(frame: CGRect(x: -1, y: -1, width: 12.0, height: 12.0))
     
     
@@ -62,6 +106,10 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         
         rockX = Int((x - x0 + 6) / length)
         rockY = Int((y - y0 + 6) / length)
+        let tempTuple = (rockX, rockY)
+        if (rockExist.contains(where: {$0 == tempTuple})) {
+            return
+        }
         
         DynamicTempView.layer.cornerRadius = 6
         DynamicTempView.layer.borderWidth = 0
@@ -84,6 +132,8 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             DynamicView.layer.cornerRadius = 6
             DynamicView.layer.borderWidth = 0
             self.view.addSubview(DynamicView)
+            self.RockImageViewMove()
+            rockExist.append((rockX, rockY))
             DynamicTempView.removeFromSuperview()
         } else {
             tempPositionX = rockX
@@ -112,12 +162,24 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         
     }
     
+    @IBAction func stopGame(_ sender: UIButton) {
+        dismiss(animated: true, completion: nil)
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-
+    @IBAction func endGame(_ sender: UIButton) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    func gameEnd() {
+        gameEndView.layer.anchorPointZ = -1.0
+        gameEndView.isHidden = false
+        gameResultLabel.text = "You Win"
+    }
     /*
     // MARK: - Navigation
 

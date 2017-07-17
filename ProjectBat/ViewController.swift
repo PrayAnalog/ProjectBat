@@ -121,6 +121,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         let user = users[indexPath.row]
         
+        cell.userGameStartButton.tag = indexPath.row
+        cell.userGameStartButton!.addTarget(self, action: #selector(self.connected(sender:)), for: .touchUpInside)
+        
         cell.userNameLabel.text = user.name
         cell.userWinLabel.text = user.win
         cell.userLoseLabel.text = user.lose
@@ -134,6 +137,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         return cell
     }
+    
+    func connected(sender: UIButton) {
+        print(users[sender.tag].name)
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: "gameScreen") as! GameViewController
+        self.present(vc, animated: true, completion: nil)
+        
+        // send request for something
+    }
+    
 
     
 

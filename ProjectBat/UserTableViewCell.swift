@@ -28,16 +28,4 @@ class UserTableViewCell: UITableViewCell {
     }
     
     
-    @IBAction func startButtonPush(_ sender: UIButton) {
-        // send socket io to request a game
-        print(userNameLabel.text!)
-        print("game start button pushed")
-        
-        // if response yes
-        
-        // if response no
-        
-    }
-    
-    
 }
