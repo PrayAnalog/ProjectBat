@@ -10,16 +10,19 @@ import UIKit
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    let socket = SocketIOClient(socketURL: URL(string: "http://52.79.188.97:3000")!, config: [.log(true), .compress])
+    let socket = SocketIOClient(socketURL: URL(string: "http://52.79.188.97:3000/dev")!, config: [.log(true), .compress])
 
     @IBOutlet weak var loginStateLabel: UILabel!
     @IBOutlet weak var loginButton: UIButton!
     
     @IBOutlet weak var userTableView: UITableView!
     
+    var users = [User]()
     var reqName : String = ""
     var phoneNumber: String = ""
-    var tier : String = ""
+    var tier : Int = 0
+    
+    var myPhoneNumber: String = ""
     
     struct customData : SocketData {
         let name: String
@@ -30,40 +33,168 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    private func addHandlers(id: String, name: String) {
-        socket.on("connect") {data, ack in
-            print("id is ", id)
-            self.socket.emit("isRegistered", id)
-
+    struct customData1 : SocketData {
+        let requester: String
+        
+        func socketRepresentation() -> SocketData {
+            return ["requester": requester]
         }
+    }
+    
+    struct customData2 : SocketData {
+        let to: String
         
-        
-        socket.on("isRegistered") { data, ack in
-//            self.socket.emit("isRegistered", "01033333333")
-            print("Hello")
-            let answer = (data[0] as! NSDictionary).object(forKey: "result") as! String
-            if (answer != "yes") {
-                print("is not Registered \(id) with name \(name)")
-                self.socket.emit("sendPhoneNumber", id, name)
-            } else {
-                print("isRegistered \(id) with name \(name)")
+        func socketRepresentation() -> SocketData {
+            return ["to": to]
+        }
+    }
+    
+    
+    private func loadUsers(data: [NSDictionary], id: String) {
+        self.users = [User]()
+        let item = data[0]
+        let sortedKeys = (item.allKeys as! [String]).sorted(by: <) // ["a", "b"]
+        for key in sortedKeys {
+            print(key)
+            print(item.object(forKey: key)!)
+            if (key == id) {
+                continue
             }
             
+            guard let user0 = User(name: item.object(forKey: key) as! String, photo: nil, win: "1", lose:"2", phoneNumber: key, alive: true) else { fatalError("Unable to instantiate meal0") }
+            
+            users += [ user0 ]
+            print(users.count)
+            
+            self.userTableView.reloadData()
         }
+        
+        
+    }
+    
+    
+    private func addHandlers(id: String, name: String) {
+        self.myPhoneNumber = id
+        
+        socket.on("onlineList") {data, ack in
+            self.loadUsers(data: data as! [NSDictionary], id: id)
+        }
+        
+        
+        socket.on("connect") {data, ack in
+            print("id is ", id)
+            self.socket.emit("sendPhoneNumber", customData(name: name, phoneNumber: id))
+        }
+        
         
         socket.on("reqGame") { data, ack in
             self.reqName = (data[0] as! NSDictionary).object(forKey: "name") as! String
             self.phoneNumber = (data[0] as! NSDictionary).object(forKey: "phoneNumber") as! String
-            self.tier = (data[0] as! NSDictionary).object(forKey: "tier") as! String
+            self.tier = (data[0] as! NSDictionary).object(forKey: "tier") as! Int
+            
+            
             print(self.reqName)
             print(self.phoneNumber)
+            print(self.tier)
+            
+            
+            
+            let alert = UIAlertController(title: "Request Game", message: "\(self.reqName) request a game", preferredStyle: UIAlertControllerStyle.alert)
+            
+            alert.addAction(UIAlertAction(title: "거절", style: UIAlertActionStyle.default, handler: nil))
+            
+            
+            self.socket.on("stopReqGame") { data, ack in
+                print("startTurn here")
+                let stopReqPhoneNumber = (data[0] as! NSDictionary).object(forKey: "phoneNumber") as! String
+                if (self.phoneNumber == stopReqPhoneNumber) {
+                    alert.dismiss(animated: true, completion: nil)
+                }
+            }
+            
+            self.socket.on("startTurn") { data, ack in
+                alert.dismiss(animated: true, completion: nil)
+                
+                let vc = self.storyboard?.instantiateViewController(withIdentifier: "gameScreen") as! GameViewController
+                
+                
+                let phoneNumber = (data[0] as! NSDictionary).object(forKey: "enemyPhoneNumber") as! String
+                let myPhoneNumber = self.myPhoneNumber
+                
+                self.present(vc, animated: true, completion: {
+                    print(myPhoneNumber)
+                    print((data[0] as! NSDictionary).object(forKey: "black") as! String)
+                    if ((data[0] as! NSDictionary).object(forKey: "black") as! String) != myPhoneNumber {
+                        
+                        vc.userColor = UIColor.white
+                        vc.enemyColor = UIColor.black
+                    } else {
+                        vc.userColor = UIColor.black
+                        vc.enemyColor = UIColor.white
+                    }
+                    
+                    if ((data[0] as! NSDictionary).object(forKey: "turn") as! Int) == 0 {
+                        vc.myOrder = false
+                    }
+                    vc.requester = phoneNumber
+                    vc.isRequester = "false"
+                    vc.myPhoneNumber = myPhoneNumber
+                    vc.enemyPhoneNumber = phoneNumber
+                    vc.socket = self.socket
+                    vc.initRockImageView()
+                    
+                    vc.socket.on("swap") {data, ack in
+                        print("why here?")
+                        //                    if ((data[0] as! NSDictionary).object(forKey: "remainChangeTurn") as! Int) == 6 {
+                        let tempColor = vc.userColor
+                        vc.userColor = vc.enemyColor
+                        vc.enemyColor = tempColor
+                        print("swap message")
+                        //                    }
+                    }
+                    
+                    vc.socket.on("nextTurn") {data, ack in
+                        let turn = (data[0] as! NSDictionary).object(forKey: "turn") as! Int
+                        if (turn == 0) {
+                            return
+                        }
+                        let row = (data[0] as! NSDictionary).object(forKey: "prev_row") as! String
+                        let col = (data[0] as! NSDictionary).object(forKey: "prev_col") as! String
+                        print(row, col)
+                        vc.paintEnemyRock(x: Int(col)!, y: Int(row)!)
+                        vc.myOrder = true
+                    }
+                    
+                    vc.socket.on("endGame") { data, ack in
+                        if ((data[0] as! NSDictionary).object(forKey: "winner") as! String) == vc.myPhoneNumber {
+                            vc.gameEnd(message: "You win")
+                        } else {
+                            vc.gameEnd(message: "You Lose")
+                        }
+                    }
+                })
+                
+
+            }
+            
+            alert.addAction(UIAlertAction(title: "수락", style: UIAlertActionStyle.default, handler: { action in
+                self.socket.emit("allowGame", customData1(requester: self.phoneNumber))
+            }))
+            
+            self.present(alert, animated: true, completion: nil)
+
         }
         
-        socket.on("alert") { data, ack in
-            // do stuff with the result
-            print("hello")
-//            print(data)
+        socket.on("alert") {data, ack in
+            print(data)
         }
+//        socket.on("nextTurn") {data, ack in
+//            let row = (data[0] as! NSDictionary).object(forKey: "prev_row") as! String
+//            let col = (data[0] as! NSDictionary).object(forKey: "prev_col") as! String
+//            print(row, col)
+//         
+//        }
+        
         
     }
     
@@ -72,14 +203,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         userTableView.delegate = self
         userTableView.dataSource = self
-        
-        loadSampleUsers()
-        
-        
-//        addHandlers()
-        
-        
-        
         
         // Do any additional setup after loading the view, typically from a nib.
         
@@ -91,7 +214,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 let value = kakao.properties?["nickname"] as! String
                 print(value)
 
-                self.addHandlers(id: "467070022"/*String(describing: kakao.id)*/, name: value)
+                self.addHandlers(id: String(describing: kakao.id!), name: value)
                 self.socket.connect()
 //                if let value = kakao.properties["profile_image"] as? String{
 //                    self.imageView.image = UIImage(data: NSData(contentsOfURL: NSURL(string: value)!)!)
@@ -143,7 +266,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                                 let value = kakao.properties?["nickname"] as! String
                                 print(value)
                                 
-                                self.addHandlers(id: String(describing: kakao.id), name: value)
+                                self.addHandlers(id: String(describing: kakao.id!), name: value)
                                 self.socket.connect()
                                 
                                 
@@ -176,31 +299,22 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    var users = [User]()
     
-    private func getUserInformation() {
-        // send api call
-        // make user class
-        
-        // insert them into users list
-    }
-    
-    private func loadSampleUsers() {
-        let photo0 = UIImage(named: "meal0")
-        let photo1 = UIImage(named: "meal1")
-        let photo2 = UIImage(named: "meal2")
-        
-        guard let user0 = User(name: "Caprese Salad", photo: photo0, win: "3", lose:"4", phoneNumber: "123456789", alive: true) else { fatalError("Unable to instantiate meal0") }
-        guard let user1 = User(name: "Chicken and Potatoes", photo: photo1, win: "6", lose:"2", phoneNumber: "34754635", alive: true) else { fatalError("Unable to instantiate meal1") }
-        guard let user2 = User(name: "Pasta with Meatballs", photo: photo2, win: "9", lose:"1", phoneNumber: "234567685", alive: false) else { fatalError("Unable to instantiate meal2") }
-        
-        users += [ user0, user1, user2 ]
-        
-    }
+//    private func loadSampleUsers() {
+//        let photo0 = UIImage(named: "meal0")
+//        let photo1 = UIImage(named: "meal1")
+//        let photo2 = UIImage(named: "meal2")
+//        
+//        guard let user0 = User(name: "Caprese Salad", photo: photo0, win: "3", lose:"4", phoneNumber: "123456789", alive: true) else { fatalError("Unable to instantiate meal0") }
+//        guard let user1 = User(name: "Chicken and Potatoes", photo: photo1, win: "6", lose:"2", phoneNumber: "34754635", alive: true) else { fatalError("Unable to instantiate meal1") }
+//        guard let user2 = User(name: "Pasta with Meatballs", photo: photo2, win: "9", lose:"1", phoneNumber: "234567685", alive: false) else { fatalError("Unable to instantiate meal2") }
+//        
+//        users += [ user0, user1, user2 ]
+//        
+//    }
 
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
         return users.count
     }
     
@@ -231,14 +345,75 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func connected(sender: UIButton) {
         print(users[sender.tag].name)
         
-        socket.emit("reqGame", users[sender.tag].phoneNumber)
+        socket.emit("reqGame", customData2(to: self.users[sender.tag].phoneNumber))
+        
+        let alert = UIAlertController(title: "Request Game", message: "request \(users[sender.tag].name) a game", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "취소", style: UIAlertActionStyle.default, handler: { action in
+            self.socket.emit("stopReqGame", customData2(to: self.users[sender.tag].phoneNumber))
+        }))
+        self.present(alert, animated: true, completion: nil)
+
         
         socket.on("startTurn") { data, ack in
+            alert.dismiss(animated: true, completion: nil)
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "gameScreen") as! GameViewController
-            self.present(vc, animated: true, completion: nil)
+            
+            let phoneNumber = self.users[sender.tag].phoneNumber
+            let myPhoneNumber = self.myPhoneNumber
+            self.present(vc, animated: true, completion: {
+                if ((data[0] as! NSDictionary).object(forKey: "black") as! String) != self.myPhoneNumber {
+                    vc.userColor = UIColor.white
+                    vc.enemyColor = UIColor.black
+                }
+                
+                if ((data[0] as! NSDictionary).object(forKey: "turn") as! Int) == 1 {
+                    vc.myOrder = false
+                }
+                vc.requester = myPhoneNumber
+                vc.isRequester = "true"
+                vc.myPhoneNumber = myPhoneNumber
+                vc.enemyPhoneNumber = phoneNumber
+                vc.socket = self.socket
+                vc.initRockImageView()
+                
+                vc.socket.on("swap") {data, ack in
+//                    if ((data[0] as! NSDictionary).object(forKey: "remainChangeTurn") as! Int) == 6 {
+                    let tempColor = vc.userColor
+                    vc.userColor = vc.enemyColor
+                    vc.enemyColor = tempColor
+                    print("swap message")
+//                    }
+                }
+                
+                vc.socket.on("nextTurn") {data, ack in
+                    
+                    let turn = (data[0] as! NSDictionary).object(forKey: "turn") as! Int
+                    if (turn == 1) {
+//                        vc.myOrder = true
+                        return
+                    }
+                    let row = (data[0] as! NSDictionary).object(forKey: "prev_row") as! String
+                    let col = (data[0] as! NSDictionary).object(forKey: "prev_col") as! String
+                    print(row, col)
+                    vc.paintEnemyRock(x: Int(col)!, y: Int(row)!)
+                    vc.myOrder = true
+                }
+                
+                vc.socket.on("endGame") { data, ack in
+                    if ((data[0] as! NSDictionary).object(forKey: "winner") as! String) == vc.myPhoneNumber {
+                        vc.gameEnd(message: "You Win")
+                    } else {
+                        vc.gameEnd(message: "You Lose")
+                    }
+                }
+                
+                vc.socket.on("escapeGame") {data, ack in
+                    vc.escapeGame()
+                }
+            })
+            
         }
         
-        // send request for something
     }
     
 

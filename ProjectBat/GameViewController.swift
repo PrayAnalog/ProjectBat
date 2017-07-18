@@ -19,12 +19,74 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var rock3ImageView: UIImageView!
     @IBOutlet weak var rock4ImageView: UIImageView!
     public var rock5Image: UIImage!
-
+    
+    public var socket: SocketIOClient!
+//    let socket2 = SocketIOClient(socketURL: URL(string: "http://52.79.188.97:3000/dev")!, config: [.log(true), .compress])
+    
+    
+    // width = 30, 346, 18 columns
+    // height = 207, 525, 18 rows
+    let x0 : Float = 30.0
+    let x18 : Float = 346
+    let y0 : Float = 207
+    let y18 : Float = 525
+    let length : Float = 17.55
+    
+    var userColor : UIColor = UIColor.black
+    var enemyColor : UIColor = UIColor.white
+    var tempPositionX : Int = -1
+    var tempPositionY : Int = -1
+    var myOrder : Bool = true
+    var rockExist : [(Int, Int)] = []
+    var DynamicTempView = UIView(frame: CGRect(x: -1, y: -1, width: 12.0, height: 12.0))
+    
+    public var myPhoneNumber: String!
+    public var enemyPhoneNumber: String!
+    public var requester: String!
+    public var isRequester: String!
+    
+    
+    // 0,0 ~ 18,18
+    // 17.55
+    
+    
+    struct customData3 : SocketData {
+        let isRequester: String
+        let requester: String
+        let phoneNumber: String
+        let col: String
+        let row: String
+        
+        func socketRepresentation() -> SocketData {
+            return ["isRequester": isRequester, "requester": requester, "phoneNumber": phoneNumber, "col": col, "row": row]
+        }
+    }
+    
+    struct customData4 : SocketData {
+        let phoneNumber: String
+        
+        func socketRepresentation() -> SocketData {
+            return ["phoneNumber": phoneNumber]
+        }
+    }
+    
+    struct custom5: SocketData {
+        let requester: String
+        
+        func socketRepresentation() -> SocketData {
+            return ["requester": requester]
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.initRockImageView()
+//        initRockImageView()
         
+        
+        
+//        socket.connect()
+//
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.showMoreActions(_:)))
         tap.numberOfTapsRequired = 1
         view.addGestureRecognizer(tap)
@@ -63,27 +125,6 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         rock5Image = tempImage
         
     }
-    
-    // width = 30, 346, 18 columns
-    // height = 207, 525, 18 rows
-    let x0 : Float = 30.0
-    let x18 : Float = 346
-    let y0 : Float = 207
-    let y18 : Float = 525
-    let length : Float = 17.55
-    
-    var userColor : UIColor = UIColor.black
-    var enemyColor : UIColor = UIColor.white
-    var tempPositionX : Int = -1
-    var tempPositionY : Int = -1
-    var myOrder : Bool = true
-    var rockExist : [(Int, Int)] = []
-    var DynamicTempView = UIView(frame: CGRect(x: -1, y: -1, width: 12.0, height: 12.0))
-    
-    
-    // 0,0 ~ 18,18
-    // 17.55
-    
 
     func showMoreActions(_ touch: UITapGestureRecognizer) {
         if (!myOrder) {
@@ -135,6 +176,10 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             self.RockImageViewMove()
             rockExist.append((rockX, rockY))
             DynamicTempView.removeFromSuperview()
+            
+            socket.emit("putPoint", customData3(isRequester: isRequester, requester: requester, phoneNumber: myPhoneNumber, col: String(rockX), row: String(rockY)))
+            self.myOrder = false
+            
         } else {
             tempPositionX = rockX
             tempPositionY = rockY
@@ -149,9 +194,10 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         if (tempPositionX == x && tempPositionY == y) {
             DynamicTempView.removeFromSuperview()
         }
-        
+        rockExist.append((x, y))
         let positionX = CGFloat(x) * CGFloat(length) + CGFloat(x0) - 7.0
-        let positionY = CGFloat(y) * CGFloat(length) + CGFloat(x0) - 7.0
+        let positionY = CGFloat(y) * CGFloat(length) + CGFloat(y0) - 7.0
+        
         
         let DynamicView = UIView(frame: CGRect(x: positionX, y: positionY, width: 12.0, height: 12.0))
         
@@ -160,9 +206,11 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         DynamicView.layer.borderWidth = 0
         self.view.addSubview(DynamicView)
         
+        
     }
     
     @IBAction func stopGame(_ sender: UIButton) {
+        socket.emit("escapeGame", custom5(requester: requester))
         dismiss(animated: true, completion: nil)
     }
     
@@ -175,10 +223,16 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         dismiss(animated: true, completion: nil)
     }
     
-    func gameEnd() {
+    func gameEnd(message: String) {
         gameEndView.layer.anchorPointZ = -1.0
         gameEndView.isHidden = false
-        gameResultLabel.text = "You Win"
+        gameResultLabel.text = message
+    }
+    
+    func escapeGame() {
+        gameEndView.layer.anchorPointZ = -1.0
+        gameEndView.isHidden = false
+        gameResultLabel.text = "쟤 도망침"
     }
     /*
     // MARK: - Navigation
