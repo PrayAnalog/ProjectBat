@@ -17,6 +17,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var userTableView: UITableView!
     @IBOutlet weak var loadingIndicatorView: UIActivityIndicatorView!
     
+    @IBOutlet weak var myImageView: UIImageView!
+    @IBOutlet weak var myUserNameLabel: UILabel!
+    @IBOutlet weak var myWinLabel: UILabel!
+    @IBOutlet weak var myLoseLabel: UILabel!
+    @IBOutlet weak var myTierLabel: UILabel!
+    
+    
     var users = [User]()
     var reqName : String = ""
     var phoneNumber: String = ""
@@ -59,6 +66,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         for key in sortedKeys {
             print(key)
             if (key == id) {
+                let value = item.object(forKey: key) as! NSDictionary
+                let name = value.object(forKey: "name") as! String
+                let photo = String(value.object(forKey: "icon") as! Int)
+                let win = String(value.object(forKey: "win") as! Int)
+                let lose = String(value.object(forKey: "lose") as! Int)
+                let tier = String(value.object(forKey: "tier") as! Int)
+                
+                myImageView.image = UIImage(named: photo)
+                myUserNameLabel.text = name
+                myWinLabel.text = win + "승"
+                myLoseLabel.text = lose + "패"
+                myTierLabel.text = tier + "단"
+                
                 continue
             }
             let value = item.object(forKey: key) as! NSDictionary
@@ -142,6 +162,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     
                     if ((data[0] as! NSDictionary).object(forKey: "turn") as! Int) == 0 {
                         vc.myOrder = false
+                        vc.turnLabel.isHidden = true
                     }
                     vc.requester = phoneNumber
                     vc.isRequester = "false"
@@ -180,6 +201,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                         print(row, col)
                         vc.paintEnemyRock(x: Int(col)!, y: Int(row)!)
                         vc.myOrder = true
+                        vc.turnLabel.isHidden = false
                     }
                     
                     vc.socket.on("endGame") { data, ack in
@@ -205,15 +227,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         socket.on("alert") {data, ack in
             print(data)
         }
-//        socket.on("nextTurn") {data, ack in
-//            let row = (data[0] as! NSDictionary).object(forKey: "prev_row") as! String
-//            let col = (data[0] as! NSDictionary).object(forKey: "prev_col") as! String
-//            print(row, col)
-//         
-//        }
-        
-        
+
     }
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -381,6 +398,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 
                 if ((data[0] as! NSDictionary).object(forKey: "turn") as! Int) == 1 {
                     vc.myOrder = false
+                    vc.turnLabel.isHidden = true
                 }
                 vc.requester = myPhoneNumber
                 vc.isRequester = "true"
@@ -408,7 +426,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     
                     let turn = (data[0] as! NSDictionary).object(forKey: "turn") as! Int
                     if (turn == 1) {
-//                        vc.myOrder = true
                         return
                     }
                     let row = (data[0] as! NSDictionary).object(forKey: "prev_row") as! String
@@ -416,6 +433,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     print(row, col)
                     vc.paintEnemyRock(x: Int(col)!, y: Int(row)!)
                     vc.myOrder = true
+                    vc.turnLabel.isHidden = false
                 }
                 
                 vc.socket.on("endGame") { data, ack in

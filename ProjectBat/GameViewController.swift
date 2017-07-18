@@ -28,6 +28,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var userLoseLabel: UILabel!
     @IBOutlet weak var userTierLabel: UILabel!
     
+    @IBOutlet weak var turnLabel: UILabel!
     
     // width = 30, 346, 18 columns
     // height = 207, 525, 18 rows
