@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -21,40 +22,26 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Login success" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iDx-BC-EVN">
-                                <rect key="frame" x="101" y="66" width="172" height="33"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <stackView opaque="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="srl-jv-kGd">
                                 <rect key="frame" x="145" y="319" width="84" height="30"/>
                             </stackView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v9o-yb-Wzz">
-                                <rect key="frame" x="145" y="28" width="84" height="30"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Kakao Login"/>
-                                <connections>
-                                    <action selector="loginKakao:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Hmy-rP-82G"/>
-                                </connections>
-                            </button>
+                            <imageView contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="kakao_login" translatesAutoresizingMaskIntoConstraints="NO" id="ekj-Dy-qve">
+                                <rect key="frame" x="75" y="488" width="226" height="49"/>
+                            </imageView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="90" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Hbm-l3-iIC">
-                                <rect key="frame" x="16" y="124" width="343" height="523"/>
+                                <rect key="frame" x="0.0" y="99" width="375" height="568"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <inset key="separatorInset" minX="1" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="UserTableViewCell" id="zW0-eO-BZH" customClass="UserTableViewCell" customModule="ProjectBat" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="28" width="343" height="90"/>
+                                        <rect key="frame" x="0.0" y="28" width="375" height="90"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zW0-eO-BZH" id="iRi-ZJ-b7W">
-                                            <rect key="frame" x="0.0" y="0.0" width="343" height="89"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="89"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="defaultPhoto" translatesAutoresizingMaskIntoConstraints="NO" id="MUo-hS-ibT">
-                                                    <rect key="frame" x="0.0" y="0.0" width="89" height="89"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="User Name" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Ac-V3-6nE">
                                                     <rect key="frame" x="97" y="8" width="144" height="21"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -81,6 +68,17 @@
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <state key="normal" title="Start"/>
                                                 </button>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Tier" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KMZ-tc-8fW">
+                                                    <rect key="frame" x="97" y="60" width="56" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="defaultPhoto" translatesAutoresizingMaskIntoConstraints="NO" id="MUo-hS-ibT">
+                                                    <rect key="frame" x="8" y="4" width="81" height="81"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </imageView>
                                             </subviews>
                                         </tableViewCellContentView>
                                         <connections>
@@ -88,6 +86,7 @@
                                             <outlet property="userImageView" destination="MUo-hS-ibT" id="08w-p5-XxA"/>
                                             <outlet property="userLoseLabel" destination="7cL-MW-hTo" id="Rdq-4E-958"/>
                                             <outlet property="userNameLabel" destination="0Ac-V3-6nE" id="0Wl-Ia-OxF"/>
+                                            <outlet property="userTierLabel" destination="KMZ-tc-8fW" id="QC4-rc-qbl"/>
                                             <outlet property="userWinLabel" destination="Ea1-Kl-d81" id="mAf-7N-e8O"/>
                                         </connections>
                                     </tableViewCell>
@@ -96,13 +95,14 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="ekj-Dy-qve" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="GVV-7l-97D"/>
                             <constraint firstItem="srl-jv-kGd" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="fOP-oN-tPN"/>
                             <constraint firstItem="srl-jv-kGd" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="mEj-XI-sjO"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="ekj-Dy-qve" secondAttribute="bottom" constant="130" id="pBB-Ny-pqe"/>
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="loginButton" destination="v9o-yb-Wzz" id="dEu-Eh-izt"/>
-                        <outlet property="loginStateLabel" destination="iDx-BC-EVN" id="3CY-TO-S0w"/>
+                        <outlet property="loginButton" destination="ekj-Dy-qve" id="sdV-gL-VzO"/>
                         <outlet property="userTableView" destination="Hbm-l3-iIC" id="VHh-yg-MTe"/>
                     </connections>
                 </viewController>
@@ -209,5 +209,6 @@
     <resources>
         <image name="background_go" width="361" height="360"/>
         <image name="defaultPhoto" width="320" height="320"/>
+        <image name="kakao_login" width="226" height="49"/>
     </resources>
 </document>

@@ -10,18 +10,20 @@ import UIKit
 
 class User {
     var name: String
-    var photo: UIImage?
+    var photo: String
     var win: String
     var lose: String
     var phoneNumber: String
     var alive: Bool
+    var tier: String
     
-    init?(name: String, photo: UIImage?, win: String, lose: String, phoneNumber:String, alive: Bool) {
+    init?(name: String, photo: String, win: String, lose: String, phoneNumber:String, alive: Bool, tier: String) {
         self.name = name
         self.photo = photo
         self.win = win
         self.lose = lose
         self.phoneNumber = phoneNumber
         self.alive = alive
+        self.tier = tier
     }
 }

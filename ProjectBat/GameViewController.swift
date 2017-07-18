@@ -87,12 +87,17 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         
 //        socket.connect()
 //
-        let tap = UITapGestureRecognizer(target: self, action: #selector(self.showMoreActions(_:)))
-        tap.numberOfTapsRequired = 1
-        view.addGestureRecognizer(tap)
         
         
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        
+    
+        let tap = UITapGestureRecognizer(target: self, action: #selector(self.showMoreActions(_:)))
+        tap.numberOfTapsRequired = 1
+        view.addGestureRecognizer(tap)
     }
     
     func initRockImageView() {

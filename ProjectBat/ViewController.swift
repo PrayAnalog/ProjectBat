@@ -12,10 +12,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     let socket = SocketIOClient(socketURL: URL(string: "http://52.79.188.97:3000/dev")!, config: [.log(true), .compress])
 
-    @IBOutlet weak var loginStateLabel: UILabel!
-    @IBOutlet weak var loginButton: UIButton!
+    @IBOutlet weak var loginButton: UIImageView!
     
     @IBOutlet weak var userTableView: UITableView!
+    @IBOutlet weak var loadingIndicatorView: UIActivityIndicatorView!
     
     var users = [User]()
     var reqName : String = ""
@@ -23,6 +23,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     var tier : Int = 0
     
     var myPhoneNumber: String = ""
+    var name: String = ""
     
     struct customData : SocketData {
         let name: String
@@ -52,29 +53,35 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     private func loadUsers(data: [NSDictionary], id: String) {
         self.users = [User]()
+        
         let item = data[0]
         let sortedKeys = (item.allKeys as! [String]).sorted(by: <) // ["a", "b"]
         for key in sortedKeys {
             print(key)
-            print(item.object(forKey: key)!)
             if (key == id) {
                 continue
             }
+            let value = item.object(forKey: key) as! NSDictionary
+            let name = value.object(forKey: "name") as! String
+            let photo = String(value.object(forKey: "icon") as! Int)
+            let win = String(value.object(forKey: "win") as! Int)
+            let lose = String(value.object(forKey: "lose") as! Int)
+            let tier = String(value.object(forKey: "tier") as! Int)
             
-            guard let user0 = User(name: item.object(forKey: key) as! String, photo: nil, win: "1", lose:"2", phoneNumber: key, alive: true) else { fatalError("Unable to instantiate meal0") }
-            
+            guard let user0 = User(name: name, photo: photo, win: win, lose: lose, phoneNumber: key, alive: true, tier: tier) else { fatalError("Unable to instantiate meal0") }
+//            print(key)
             users += [ user0 ]
-            print(users.count)
             
-            self.userTableView.reloadData()
         }
         
+        self.userTableView.reloadData()
         
     }
     
     
     private func addHandlers(id: String, name: String) {
         self.myPhoneNumber = id
+        self.name = name
         
         socket.on("onlineList") {data, ack in
             self.loadUsers(data: data as! [NSDictionary], id: id)
@@ -204,7 +211,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         userTableView.delegate = self
         userTableView.dataSource = self
         
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(imageTapped(tapGestureRecognizer:)))
+        loginButton.isUserInteractionEnabled = true
+        loginButton.addGestureRecognizer(tapGestureRecognizer)
+        
         // Do any additional setup after loading the view, typically from a nib.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(false)
+        socket.removeAllHandlers()
         
         KOSessionTask.meTask(completionHandler: { (profile , error) -> Void in
             if profile != nil {
@@ -213,24 +229,24 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 print(kakao.id)
                 let value = kakao.properties?["nickname"] as! String
                 print(value)
-
+                
                 self.addHandlers(id: String(describing: kakao.id!), name: value)
                 self.socket.connect()
 //                if let value = kakao.properties["profile_image"] as? String{
 //                    self.imageView.image = UIImage(data: NSData(contentsOfURL: NSURL(string: value)!)!)
 //                }
-//                if let value = kakao.properties["thumbnail_image"] as? String{
-//                    self.image2View.image = UIImage(data: NSData(contentsOfURL: NSURL(string: value)!)!)
-//                }
+                //                if let value = kakao.properties["thumbnail_image"] as? String{
+                //                    self.image2View.image = UIImage(data: NSData(contentsOfURL: NSURL(string: value)!)!)
+                //                }
                 
                 self.loginButton.isHidden = true
             } else {
                 print("not logged in state")
                 self.userTableView.isHidden = true
-                self.loginStateLabel.isHidden = true
             }
         })
-        
+
+//        self.addHandlers(id: myPhoneNumber, name: name)
     }
 
     override func didReceiveMemoryWarning() {
@@ -239,7 +255,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
 
-    @IBAction func loginKakao(_ sender: UIButton) {
+    func imageTapped(tapGestureRecognizer: UITapGestureRecognizer) {
         let session = KOSession.shared()
         // 로그인 세션이 생성 되었으면
         if let s = session {
@@ -255,7 +271,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     if s.isOpen() {
                         print("Success")
                         self.loginButton.isHidden = true
-                        self.loginStateLabel.isHidden = false
                         self.userTableView.isHidden = false
                         
                         KOSessionTask.meTask(completionHandler: { (profile , error) -> Void in
@@ -274,7 +289,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                             } else {
                                 print("not logged in state")
                                 self.userTableView.isHidden = true
-                                self.loginStateLabel.isHidden = true
                             }
                         })
                         
@@ -299,21 +313,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         }
     }
     
-    
-//    private func loadSampleUsers() {
-//        let photo0 = UIImage(named: "meal0")
-//        let photo1 = UIImage(named: "meal1")
-//        let photo2 = UIImage(named: "meal2")
-//        
-//        guard let user0 = User(name: "Caprese Salad", photo: photo0, win: "3", lose:"4", phoneNumber: "123456789", alive: true) else { fatalError("Unable to instantiate meal0") }
-//        guard let user1 = User(name: "Chicken and Potatoes", photo: photo1, win: "6", lose:"2", phoneNumber: "34754635", alive: true) else { fatalError("Unable to instantiate meal1") }
-//        guard let user2 = User(name: "Pasta with Meatballs", photo: photo2, win: "9", lose:"1", phoneNumber: "234567685", alive: false) else { fatalError("Unable to instantiate meal2") }
-//        
-//        users += [ user0, user1, user2 ]
-//        
-//    }
-
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return users.count
     }
@@ -329,9 +328,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.userGameStartButton!.addTarget(self, action: #selector(self.connected(sender:)), for: .touchUpInside)
         
         cell.userNameLabel.text = user.name
-        cell.userWinLabel.text = user.win
-        cell.userLoseLabel.text = user.lose
-        cell.userImageView.image = user.photo
+        cell.userWinLabel.text = user.win + "승"
+        cell.userLoseLabel.text = user.lose + "패"
+        cell.userImageView.image = UIImage(named: user.photo)
+        cell.userTierLabel.text = user.tier + "단"
         if (user.alive) {
             cell.userGameStartButton.setTitle("Start", for: .normal)
         } else {
@@ -357,6 +357,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         socket.on("startTurn") { data, ack in
             alert.dismiss(animated: true, completion: nil)
             let vc = self.storyboard?.instantiateViewController(withIdentifier: "gameScreen") as! GameViewController
+            
+            
+
             
             let phoneNumber = self.users[sender.tag].phoneNumber
             let myPhoneNumber = self.myPhoneNumber
