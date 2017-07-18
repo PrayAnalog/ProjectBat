@@ -237,6 +237,7 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         gameEndView.layer.anchorPointZ = -1.0
         gameEndView.isHidden = false
         gameResultLabel.text = message
+        socket.emit("okEndGame", "")
     }
     
     func escapeGame() {
