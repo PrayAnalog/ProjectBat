@@ -38,6 +38,8 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     let y18 : Float = 525
     let length : Float = 17.55
     
+    let dynamicBeforeView = UIView(frame: CGRect(x: -1, y: -1, width: 4.0, height: 4.0))
+    
     var userColor : UIColor = UIColor.black
     var enemyColor : UIColor = UIColor.white
     var tempPositionX : Int = -1
@@ -104,6 +106,12 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.showMoreActions(_:)))
         tap.numberOfTapsRequired = 1
         view.addGestureRecognizer(tap)
+        
+        dynamicBeforeView.layer.cornerRadius = 2
+        dynamicBeforeView.layer.borderWidth = 0
+        dynamicBeforeView.layer.anchorPointZ = -1
+        dynamicBeforeView.backgroundColor = UIColor.red
+        self.view.addSubview(dynamicBeforeView)
     }
     
     func initRockImageView() {
@@ -163,6 +171,8 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             return
         }
         
+        
+        
         DynamicTempView.layer.cornerRadius = 6
         DynamicTempView.layer.borderWidth = 0
         if (userColor == UIColor.black) {
@@ -179,6 +189,9 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         
         if (tempPositionX == rockX && tempPositionY == rockY) {
             let DynamicView = UIView(frame: CGRect(x: positionX, y: positionY, width: 12.0, height: 12.0))
+            dynamicBeforeView.removeFromSuperview()
+            dynamicBeforeView.frame.origin.x = positionX + 4
+            dynamicBeforeView.frame.origin.y = positionY + 4
             
             DynamicView.backgroundColor = userColor
             DynamicView.layer.cornerRadius = 6
@@ -186,10 +199,13 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
             self.view.addSubview(DynamicView)
             self.RockImageViewMove()
             rockExist.append((rockX, rockY))
+            dynamicBeforeView.layer.anchorPointZ = -1
             DynamicTempView.removeFromSuperview()
+            self.view.addSubview(dynamicBeforeView)
             
             socket.emit("putPoint", customData3(isRequester: isRequester, requester: requester, phoneNumber: myPhoneNumber, col: String(rockX), row: String(rockY)))
             self.myOrder = false
+            self.turnLabel.isHidden = true
             
         } else {
             tempPositionX = rockX
@@ -205,6 +221,8 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         if (tempPositionX == x && tempPositionY == y) {
             DynamicTempView.removeFromSuperview()
         }
+        
+        dynamicBeforeView.removeFromSuperview()
         rockExist.append((x, y))
         let positionX = CGFloat(x) * CGFloat(length) + CGFloat(x0) - 7.0
         let positionY = CGFloat(y) * CGFloat(length) + CGFloat(y0) - 7.0
@@ -217,6 +235,9 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
         DynamicView.layer.borderWidth = 0
         self.view.addSubview(DynamicView)
         
+        dynamicBeforeView.frame.origin.x = positionX + 4
+        dynamicBeforeView.frame.origin.y = positionY + 4
+        self.view.addSubview(dynamicBeforeView)
         
     }
     
