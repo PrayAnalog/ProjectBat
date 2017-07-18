@@ -13,13 +13,15 @@ class User {
     var photo: UIImage?
     var win: String
     var lose: String
+    var phoneNumber: String
     var alive: Bool
     
-    init?(name: String, photo: UIImage?, win: String, lose: String, alive: Bool) {
+    init?(name: String, photo: UIImage?, win: String, lose: String, phoneNumber:String, alive: Bool) {
         self.name = name
         self.photo = photo
         self.win = win
         self.lose = lose
+        self.phoneNumber = phoneNumber
         self.alive = alive
     }
 }

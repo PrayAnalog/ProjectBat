@@ -10,12 +10,62 @@ import UIKit
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
-    
+    let socket = SocketIOClient(socketURL: URL(string: "http://52.79.188.97:3000")!, config: [.log(true), .compress])
 
     @IBOutlet weak var loginStateLabel: UILabel!
     @IBOutlet weak var loginButton: UIButton!
     
     @IBOutlet weak var userTableView: UITableView!
+    
+    var reqName : String = ""
+    var phoneNumber: String = ""
+    var tier : String = ""
+    
+    struct customData : SocketData {
+        let name: String
+        let phoneNumber: String
+        
+        func socketRepresentation() -> SocketData {
+            return ["name": name, "phoneNumber": phoneNumber]
+        }
+    }
+    
+    private func addHandlers(id: String, name: String) {
+        socket.on("connect") {data, ack in
+            print("id is ", id)
+            self.socket.emit("isRegistered", id)
+
+        }
+        
+        
+        socket.on("isRegistered") { data, ack in
+//            self.socket.emit("isRegistered", "01033333333")
+            print("Hello")
+            let answer = (data[0] as! NSDictionary).object(forKey: "result") as! String
+            if (answer != "yes") {
+                print("is not Registered \(id) with name \(name)")
+                self.socket.emit("sendPhoneNumber", id, name)
+            } else {
+                print("isRegistered \(id) with name \(name)")
+            }
+            
+        }
+        
+        socket.on("reqGame") { data, ack in
+            self.reqName = (data[0] as! NSDictionary).object(forKey: "name") as! String
+            self.phoneNumber = (data[0] as! NSDictionary).object(forKey: "phoneNumber") as! String
+            self.tier = (data[0] as! NSDictionary).object(forKey: "tier") as! String
+            print(self.reqName)
+            print(self.phoneNumber)
+        }
+        
+        socket.on("alert") { data, ack in
+            // do stuff with the result
+            print("hello")
+//            print(data)
+        }
+        
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,15 +75,35 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         loadSampleUsers()
         
+        
+//        addHandlers()
+        
+        
+        
+        
         // Do any additional setup after loading the view, typically from a nib.
         
-        KOSessionTask.accessTokenInfoTask(completionHandler: { (result, error) in
-            if error == nil {
+        KOSessionTask.meTask(completionHandler: { (profile , error) -> Void in
+            if profile != nil {
                 print("logged in state")
-                print(result!.id)
+                let kakao : KOUser = profile as! KOUser
+                print(kakao.id)
+                let value = kakao.properties?["nickname"] as! String
+                print(value)
+
+                self.addHandlers(id: "467070022"/*String(describing: kakao.id)*/, name: value)
+                self.socket.connect()
+//                if let value = kakao.properties["profile_image"] as? String{
+//                    self.imageView.image = UIImage(data: NSData(contentsOfURL: NSURL(string: value)!)!)
+//                }
+//                if let value = kakao.properties["thumbnail_image"] as? String{
+//                    self.image2View.image = UIImage(data: NSData(contentsOfURL: NSURL(string: value)!)!)
+//                }
+                
                 self.loginButton.isHidden = true
             } else {
                 print("not logged in state")
+                self.userTableView.isHidden = true
                 self.loginStateLabel.isHidden = true
             }
         })
@@ -50,7 +120,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let session = KOSession.shared()
         // 로그인 세션이 생성 되었으면
         if let s = session {
-            print(KOSessionState.open.rawValue)
             // 이전 열린 세션은 닫고
             if s.isOpen() {
                 s.close()
@@ -64,6 +133,27 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                         print("Success")
                         self.loginButton.isHidden = true
                         self.loginStateLabel.isHidden = false
+                        self.userTableView.isHidden = false
+                        
+                        KOSessionTask.meTask(completionHandler: { (profile , error) -> Void in
+                            if profile != nil {
+                                print("logged in state")
+                                let kakao : KOUser = profile as! KOUser
+                                print(kakao.id)
+                                let value = kakao.properties?["nickname"] as! String
+                                print(value)
+                                
+                                self.addHandlers(id: String(describing: kakao.id), name: value)
+                                self.socket.connect()
+                                
+                                
+                                self.loginButton.isHidden = true
+                            } else {
+                                print("not logged in state")
+                                self.userTableView.isHidden = true
+                                self.loginStateLabel.isHidden = true
+                            }
+                        })
                         
                     }
                     
@@ -100,9 +190,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         let photo1 = UIImage(named: "meal1")
         let photo2 = UIImage(named: "meal2")
         
-        guard let user0 = User(name: "Caprese Salad", photo: photo0, win: "3", lose:"4", alive: true) else { fatalError("Unable to instantiate meal0") }
-        guard let user1 = User(name: "Chicken and Potatoes", photo: photo1, win: "6", lose:"2", alive: true) else { fatalError("Unable to instantiate meal1") }
-        guard let user2 = User(name: "Pasta with Meatballs", photo: photo2, win: "9", lose:"1", alive: false) else { fatalError("Unable to instantiate meal2") }
+        guard let user0 = User(name: "Caprese Salad", photo: photo0, win: "3", lose:"4", phoneNumber: "123456789", alive: true) else { fatalError("Unable to instantiate meal0") }
+        guard let user1 = User(name: "Chicken and Potatoes", photo: photo1, win: "6", lose:"2", phoneNumber: "34754635", alive: true) else { fatalError("Unable to instantiate meal1") }
+        guard let user2 = User(name: "Pasta with Meatballs", photo: photo2, win: "9", lose:"1", phoneNumber: "234567685", alive: false) else { fatalError("Unable to instantiate meal2") }
         
         users += [ user0, user1, user2 ]
         
@@ -140,8 +230,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func connected(sender: UIButton) {
         print(users[sender.tag].name)
-        let vc = self.storyboard?.instantiateViewController(withIdentifier: "gameScreen") as! GameViewController
-        self.present(vc, animated: true, completion: nil)
+        
+        socket.emit("reqGame", users[sender.tag].phoneNumber)
+        
+        socket.on("startTurn") { data, ack in
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "gameScreen") as! GameViewController
+            self.present(vc, animated: true, completion: nil)
+        }
         
         // send request for something
     }
