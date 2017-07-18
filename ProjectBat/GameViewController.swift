@@ -22,6 +22,11 @@ class GameViewController: UIViewController, UIGestureRecognizerDelegate {
     
     public var socket: SocketIOClient!
 //    let socket2 = SocketIOClient(socketURL: URL(string: "http://52.79.188.97:3000/dev")!, config: [.log(true), .compress])
+    @IBOutlet weak var userImageView: UIImageView!
+    @IBOutlet weak var userNameLabel: UILabel!
+    @IBOutlet weak var userWinLabel: UILabel!
+    @IBOutlet weak var userLoseLabel: UILabel!
+    @IBOutlet weak var userTierLabel: UILabel!
     
     
     // width = 30, 346, 18 columns

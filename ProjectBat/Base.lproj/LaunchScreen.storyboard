@@ -25,10 +25,6 @@
                                 <rect key="frame" x="67" y="455" width="240" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
-                            <imageView userInteractionEnabled="NO" alpha="0.59999999999999998" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="launch_default" translatesAutoresizingMaskIntoConstraints="NO" id="aAl-2w-1bR">
-                                <rect key="frame" x="0.0" y="219" width="375" height="228"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="go_black" translatesAutoresizingMaskIntoConstraints="NO" id="owv-Td-6ZD">
                                 <rect key="frame" x="67" y="83" width="240" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -45,6 +41,5 @@
     <resources>
         <image name="go_black" width="80" height="80"/>
         <image name="go_white" width="80" height="80"/>
-        <image name="launch_default" width="325" height="181"/>
     </resources>
 </document>

@@ -150,6 +150,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                     vc.socket = self.socket
                     vc.initRockImageView()
                     
+                    for user in self.users {
+                        if (user.phoneNumber == phoneNumber) {
+                            vc.userImageView.image = UIImage(named: user.photo)
+                            vc.userNameLabel.text = user.name
+                            vc.userWinLabel.text = user.win + "승"
+                            vc.userLoseLabel.text = user.lose + "패"
+                            vc.userTierLabel.text = user.tier + "단"
+                        }
+                    }
+                    
                     vc.socket.on("swap") {data, ack in
                         print("why here?")
                         //                    if ((data[0] as! NSDictionary).object(forKey: "remainChangeTurn") as! Int) == 6 {
@@ -332,11 +342,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.userLoseLabel.text = user.lose + "패"
         cell.userImageView.image = UIImage(named: user.photo)
         cell.userTierLabel.text = user.tier + "단"
-        if (user.alive) {
-            cell.userGameStartButton.setTitle("Start", for: .normal)
-        } else {
-            cell.userGameStartButton.setTitle("Offline", for: .disabled)
-        }
+        
+        cell.backgroundColor = UIColor(colorLiteralRed: Float(user.photo)!/25.0, green: Float(user.photo)!/25.0, blue: Float(user.photo)!/25.0, alpha: 0.3)
+        
         //        cell.GameStartbutton.title = user.alive
         
         return cell
@@ -344,6 +352,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func connected(sender: UIButton) {
         print(users[sender.tag].name)
+        
+        let user = users[sender.tag]
         
         socket.emit("reqGame", customData2(to: self.users[sender.tag].phoneNumber))
         
@@ -378,6 +388,12 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 vc.enemyPhoneNumber = phoneNumber
                 vc.socket = self.socket
                 vc.initRockImageView()
+                
+                vc.userImageView.image = UIImage(named: user.photo)
+                vc.userNameLabel.text = user.name
+                vc.userWinLabel.text = user.win + "승"
+                vc.userLoseLabel.text = user.lose + "패"
+                vc.userTierLabel.text = user.tier + "단"
                 
                 vc.socket.on("swap") {data, ack in
 //                    if ((data[0] as! NSDictionary).object(forKey: "remainChangeTurn") as! Int) == 6 {
